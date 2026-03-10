@@ -1,0 +1,69 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: products
+// Fields: name, sku, categoryId, price, cost, stockQuantity, minStock, image, description, createdAt, updatedAt
+//
+// Collection: categories
+// Fields: name, description
+//
+// Collection: inventory_moves
+// Fields: productId, type, quantity, reference, date, userId
+//
+// Collection: users
+// Fields: name, email, role
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "usama7437@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isManager() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager'];
+    }
+
+    function isValidProduct(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.sku is string && data.sku.size() > 0 &&
+             data.price is number && data.price >= 0 &&
+             data.stockQuantity is number;
+    }
+
+    // Rules
+    
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || (isAuthenticated() && request.auth.uid == userId && !('role' in request.resource.data));
+    }
+
+    match /products/{productId} {
+      allow read: if isAuthenticated();
+      allow write: if isManager();
+    }
+
+    match /categories/{categoryId} {
+      allow read: if isAuthenticated();
+      allow write: if isManager();
+    }
+
+    match /inventory_moves/{moveId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+  }
+}

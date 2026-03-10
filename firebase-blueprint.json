@@ -1,0 +1,64 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A product in the inventory",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Product name" },
+        "sku": { "type": "string", "description": "Stock Keeping Unit" },
+        "categoryId": { "type": "string", "description": "Reference to Category" },
+        "price": { "type": "number", "description": "Selling price" },
+        "cost": { "type": "number", "description": "Purchase cost" },
+        "stockQuantity": { "type": "number", "description": "Current stock level" },
+        "minStock": { "type": "number", "description": "Minimum stock alert level" },
+        "image": { "type": "string", "description": "Product image URL" },
+        "description": { "type": "string", "description": "Product description" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "sku", "categoryId", "price", "stockQuantity"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Product category",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "InventoryMove": {
+      "title": "Inventory Move",
+      "description": "A stock movement (In/Out)",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string" },
+        "type": { "type": "string", "enum": ["IN", "OUT"] },
+        "quantity": { "type": "number" },
+        "reference": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" }
+      },
+      "required": ["productId", "type", "quantity", "date"]
+    },
+    "User": {
+      "title": "User",
+      "description": "System user",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "manager", "staff"] }
+      },
+      "required": ["name", "email", "role"]
+    }
+  },
+  "firestore": {
+    "products": { "schema": "Product", "description": "Collection of products" },
+    "categories": { "schema": "Category", "description": "Collection of categories" },
+    "inventory_moves": { "schema": "InventoryMove", "description": "History of stock movements" },
+    "users": { "schema": "User", "description": "System users and roles" }
+  }
+}
